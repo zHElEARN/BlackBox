@@ -1,10 +1,9 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,22 +11,46 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: Colors[colorScheme ?? "light"].background,
+        },
+        headerTintColor: Colors[colorScheme ?? "light"].text,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="cockpit/index"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "驾驶舱",
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="airplane" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="track/index"
+        options={{
+          title: "航迹",
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="map-marker-path" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="radar/index"
+        options={{
+          title: "雷达",
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="radar" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="ground/index"
+        options={{
+          title: "地勤",
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="wrench" size={28} color={color} />,
         }}
       />
     </Tabs>
