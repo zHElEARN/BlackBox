@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
@@ -6,18 +6,30 @@ import { Colors } from "@/constants/theme";
 import { FlightTrack } from "@/db/schema";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+import { useRouter } from "expo-router";
+
 interface FlightRecordCardProps {
   track: FlightTrack;
   style?: ViewStyle;
+  onPress?: (track: FlightTrack) => void;
   onLongPress?: (track: FlightTrack) => void;
 }
 
-export function FlightRecordCard({ track, style, onLongPress }: FlightRecordCardProps) {
+export function FlightRecordCard({ track, style, onPress, onLongPress }: FlightRecordCardProps) {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
+  const router = useRouter();
 
   const handleLongPress = () => {
     onLongPress?.(track);
+  };
+
+  const handlePress = () => {
+    if (onPress === undefined) {
+      router.push(`/flight-detail/${track.id}`);
+    } else {
+      onPress?.(track);
+    }
   };
 
   const takeoffDate = new Date(track.takeoffTime);
@@ -45,7 +57,7 @@ export function FlightRecordCard({ track, style, onLongPress }: FlightRecordCard
   };
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onLongPress={handleLongPress} style={[styles.card, { backgroundColor: theme.card }, style]}>
+    <TouchableOpacity activeOpacity={0.7} onPress={handlePress} onLongPress={handleLongPress} style={[styles.card, { backgroundColor: theme.card }, style]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={[styles.flightId, { color: theme.tint }]}>#{track.id}</Text>
@@ -93,15 +105,6 @@ export function FlightRecordCard({ track, style, onLongPress }: FlightRecordCard
           )}
         </View>
       </View>
-
-      {track.note && (
-        <View style={styles.footer}>
-          <Ionicons name="chatbox-outline" size={14} color={theme.icon} />
-          <Text style={[styles.note, { color: theme.icon }]} numberOfLines={1}>
-            备注: {track.note}
-          </Text>
-        </View>
-      )}
     </TouchableOpacity>
   );
 }
@@ -192,16 +195,5 @@ const styles = StyleSheet.create({
   planeIcon: {
     marginHorizontal: 4,
     transform: [{ rotate: "45deg" }],
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  note: {
-    fontSize: 12,
-    fontStyle: "italic",
-    marginLeft: 4,
-    flex: 1,
   },
 });

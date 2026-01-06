@@ -46,4 +46,12 @@ export const Database = {
   async deleteTrack(id: number) {
     return await db.delete(flightTracks).where(eq(flightTracks.id, id));
   },
+
+  /**
+   * 按 ID 获取单条记录
+   */
+  async getTrackById(id: number) {
+    const results = await db.select().from(flightTracks).where(eq(flightTracks.id, id));
+    return results[0] || null;
+  },
 };
