@@ -1,4 +1,4 @@
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 
@@ -12,6 +12,7 @@ export default function TrackScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
   const [tracks, setTracks] = useState<FlightTrack[]>([]);
+  const router = useRouter();
 
   const loadTracks = async () => {
     try {
@@ -29,9 +30,9 @@ export default function TrackScreen() {
   );
 
   const handleLongPress = (track: FlightTrack) => {
-    Alert.alert("航班操作", "", [
+    Alert.alert("请选择操作", `飞行记录 #${track.id}`, [
       {
-        text: "删除",
+        text: "删除记录",
         style: "destructive",
         onPress: () => {
           Alert.alert("确认删除", "确定要删除这条飞行记录吗？此操作不可撤销。", [
@@ -52,7 +53,12 @@ export default function TrackScreen() {
           ]);
         },
       },
-      { text: "查看详情", onPress: () => console.log("查看详情") },
+      {
+        text: "查看详情",
+        onPress: () => {
+          router.push(`/flight-detail/${track.id}`);
+        },
+      },
       { text: "取消", style: "cancel" },
     ]);
   };
