@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { FlightTrack } from "@/db/schema";
@@ -9,11 +9,16 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 interface FlightRecordCardProps {
   track: FlightTrack;
   style?: ViewStyle;
+  onLongPress?: (track: FlightTrack) => void;
 }
 
-export function FlightRecordCard({ track, style }: FlightRecordCardProps) {
+export function FlightRecordCard({ track, style, onLongPress }: FlightRecordCardProps) {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
+
+  const handleLongPress = () => {
+    onLongPress?.(track);
+  };
 
   const takeoffDate = new Date(track.takeoffTime);
   const landingDate = new Date(track.landingTime);
@@ -40,9 +45,12 @@ export function FlightRecordCard({ track, style }: FlightRecordCardProps) {
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.card }, style]}>
+    <TouchableOpacity activeOpacity={0.7} onLongPress={handleLongPress} style={[styles.card, { backgroundColor: theme.card }, style]}>
       <View style={styles.header}>
-        <Text style={[styles.date, { color: theme.icon }]}>{formatDate(takeoffDate)}</Text>
+        <View style={styles.headerLeft}>
+          <Text style={[styles.flightId, { color: theme.tint }]}>#{track.id}</Text>
+          <Text style={[styles.date, { color: theme.icon }]}>{formatDate(takeoffDate)}</Text>
+        </View>
         <View
           style={[
             styles.badge,
@@ -94,7 +102,7 @@ export function FlightRecordCard({ track, style }: FlightRecordCardProps) {
           </Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -115,6 +123,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  flightId: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginRight: 8,
+  },
   date: {
     fontSize: 14,
     fontWeight: "600",
@@ -132,7 +149,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
   },
   timeContainer: {
     flex: 1,
@@ -180,7 +196,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 16,
   },
   note: {
     fontSize: 12,

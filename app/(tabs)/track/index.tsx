@@ -1,6 +1,6 @@
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { FlightRecordCard } from "@/components/flight-record-card";
 import { Colors } from "@/constants/theme";
@@ -28,9 +28,36 @@ export default function TrackScreen() {
     }, [])
   );
 
-  const renderItem = ({ item }: { item: FlightTrack }) => (
-    <FlightRecordCard track={item} />
-  );
+  const handleLongPress = (track: FlightTrack) => {
+    Alert.alert("航班操作", "", [
+      {
+        text: "删除",
+        style: "destructive",
+        onPress: () => {
+          Alert.alert("确认删除", "确定要删除这条飞行记录吗？此操作不可撤销。", [
+            { text: "取消", style: "cancel" },
+            {
+              text: "确认删除",
+              style: "destructive",
+              onPress: async () => {
+                try {
+                  await Database.deleteTrack(track.id);
+                  loadTracks();
+                } catch (error) {
+                  console.error("Failed to delete track:", error);
+                  Alert.alert("错误", "删除失败，请重试");
+                }
+              },
+            },
+          ]);
+        },
+      },
+      { text: "查看详情", onPress: () => console.log("查看详情") },
+      { text: "取消", style: "cancel" },
+    ]);
+  };
+
+  const renderItem = ({ item }: { item: FlightTrack }) => <FlightRecordCard track={item} onLongPress={handleLongPress} />;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -41,7 +68,7 @@ export default function TrackScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: theme.text }]}>暂无飞行记录</Text>
+            <Text style={[styles.emptyText, { color: theme.icon }]}>暂无飞行记录</Text>
           </View>
         }
       />
@@ -57,10 +84,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   emptyContainer: {
-    padding: 20,
+    flex: 1,
+    paddingVertical: 40,
     alignItems: "center",
+    justifyContent: "center",
   },
   emptyText: {
-    opacity: 0.5,
+    fontSize: 16,
+    opacity: 0.6,
   },
 });
