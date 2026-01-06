@@ -2,6 +2,7 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 
+import { FlightRecordCard } from "@/components/flight-record-card";
 import { Colors } from "@/constants/theme";
 import { FlightTrack } from "@/db/schema";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -28,24 +29,7 @@ export default function TrackScreen() {
   );
 
   const renderItem = ({ item }: { item: FlightTrack }) => (
-    <View style={[styles.card, { backgroundColor: theme.card }]}>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.text }]}>ID:</Text>
-        <Text style={[styles.value, { color: theme.text }]}>{item.id}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.text }]}>起飞:</Text>
-        <Text style={[styles.value, { color: theme.text }]}>{new Date(item.takeoffTime).toLocaleString()}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.text }]}>降落:</Text>
-        <Text style={[styles.value, { color: theme.text }]}>{new Date(item.landingTime).toLocaleString()}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.text }]}>类型:</Text>
-        <Text style={[styles.value, { color: theme.text }]}>{item.landingType === "NORMAL" ? "普通" : "迫降"}</Text>
-      </View>
-    </View>
+    <FlightRecordCard track={item} />
   );
 
   return (
@@ -71,25 +55,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-  },
-  card: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.2)",
-  },
-  row: {
-    flexDirection: "row",
-    marginBottom: 4,
-  },
-  label: {
-    fontWeight: "bold",
-    marginRight: 8,
-    width: 40,
-  },
-  value: {
-    flex: 1,
   },
   emptyContainer: {
     padding: 20,
