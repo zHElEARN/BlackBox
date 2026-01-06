@@ -21,7 +21,7 @@ const getDuration = (startTime: number | null, now: number) => {
 export default function CockpitScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
-  const { isFlying, takeoffTime, isLoading, startFlight, endFlight } = useFlightStore();
+  const { isFlying, takeoffTime, isLoading, loadingMessage, startFlight, endFlight } = useFlightStore();
 
   const [now, setNow] = useState(Date.now());
 
@@ -47,7 +47,8 @@ export default function CockpitScreen() {
   if (isLoading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <ActivityIndicator size="large" color={theme.text} />
+        <ActivityIndicator size="large" color={theme.tint} />
+        {loadingMessage && <Text style={[styles.loadingText, { color: theme.text }]}>{loadingMessage}</Text>}
       </View>
     );
   }
@@ -133,5 +134,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    opacity: 0.8,
   },
 });

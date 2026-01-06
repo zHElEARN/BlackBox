@@ -1,4 +1,5 @@
 import { Database } from "@/utils/database";
+import { LocationService } from "@/utils/location";
 import { Storage } from "@/utils/storage";
 import { Alert } from "react-native";
 import { create } from "zustand";
@@ -8,10 +9,13 @@ const STORAGE_KEY = "flight_state";
 interface FlightStateData {
   isFlying: boolean;
   takeoffTime: number | null;
+  takeoffLat: number | null;
+  takeoffLong: number | null;
 }
 
 interface FlightState extends FlightStateData {
   isLoading: boolean;
+  loadingMessage: string | null;
   startFlight: () => Promise<void>;
   endFlight: (landingType?: "NORMAL" | "FORCED") => Promise<void>;
   restoreState: () => Promise<void>;
@@ -20,42 +24,92 @@ interface FlightState extends FlightStateData {
 export const useFlightStore = create<FlightState>((set, get) => ({
   isFlying: false,
   takeoffTime: null,
+  takeoffLat: null,
+  takeoffLong: null,
   isLoading: true,
+  loadingMessage: null,
 
   startFlight: async () => {
-    const now = Date.now();
-    const newState: FlightStateData = { isFlying: true, takeoffTime: now };
-
-    // Optimistic update
-    set(newState);
-
+    set({ isLoading: true, loadingMessage: "正在准备起飞..." });
     try {
+      // 1. 请求权限并定位
+      const hasPermission = await LocationService.requestPermissions();
+      let location = null;
+      if (hasPermission) {
+        set({ loadingMessage: "正在获取当前位置..." });
+        try {
+          location = await LocationService.getCurrentLocation();
+        } catch (err: any) {
+          if (err.message === "LOCATION_TIMEOUT") {
+            Alert.alert("定位超时", "获取位置时间过长，将以无位置模式继续记录。");
+          }
+        }
+      }
+
+      const now = Date.now();
+      const newState: FlightStateData = {
+        isFlying: true,
+        takeoffTime: now,
+        takeoffLat: location?.latitude ?? null,
+        takeoffLong: location?.longitude ?? null,
+      };
+
+      // 2. 保存到 KV 并更新状态
       await Storage.set(STORAGE_KEY, newState);
+      set({ ...newState, isLoading: false, loadingMessage: null });
     } catch (e) {
-      console.error("Failed to save flight state to KV", e);
+      console.error("Failed to start flight:", e);
+      set({ isLoading: false, loadingMessage: null });
+      Alert.alert("错误", "启动飞行记录失败");
     }
   },
 
   endFlight: async (landingType: "NORMAL" | "FORCED" = "NORMAL") => {
-    const { isFlying, takeoffTime } = get();
+    const { isFlying, takeoffTime, takeoffLat, takeoffLong } = get();
 
     if (!isFlying || !takeoffTime) return;
 
+    set({ isLoading: true, loadingMessage: "正在记录降落数据..." });
+
     try {
-      // 1. Save to SQLite
+      // 1. 获取降落位置
+      set({ loadingMessage: "正在获取当前位置..." });
+      let location = null;
+      try {
+        location = await LocationService.getCurrentLocation();
+      } catch (err: any) {
+        if (err.message === "LOCATION_TIMEOUT") {
+          Alert.alert("定位超时", "获取降落位置超时，将以无位置模式完成保存。");
+        }
+      }
+
+      // 2. 保存到 SQLite
+      set({ loadingMessage: "正在保存记录..." });
       await Database.addTrack({
         takeoffTime: new Date(takeoffTime).toISOString(),
         landingTime: new Date().toISOString(),
+        takeoffLat: takeoffLat,
+        takeoffLong: takeoffLong,
+        landingLat: location?.latitude ?? null,
+        landingLong: location?.longitude ?? null,
         landingType: landingType,
       });
 
-      // 2. Clear from KV
+      // 3. 清理 KV
       await Storage.remove(STORAGE_KEY);
 
-      // 3. Update State
-      set({ isFlying: false, takeoffTime: null });
+      // 4. 更新状态
+      set({
+        isFlying: false,
+        takeoffTime: null,
+        takeoffLat: null,
+        takeoffLong: null,
+        isLoading: false,
+        loadingMessage: null,
+      });
     } catch (error) {
       console.error("Failed to end flight:", error);
+      set({ isLoading: false, loadingMessage: null });
       Alert.alert("错误", "保存飞行记录失败");
     }
   },
@@ -64,7 +118,13 @@ export const useFlightStore = create<FlightState>((set, get) => ({
     try {
       const saved = await Storage.get<FlightStateData>(STORAGE_KEY);
       if (saved && saved.isFlying && saved.takeoffTime) {
-        set({ isFlying: true, takeoffTime: saved.takeoffTime, isLoading: false });
+        set({
+          isFlying: true,
+          takeoffTime: saved.takeoffTime,
+          takeoffLat: saved.takeoffLat ?? null,
+          takeoffLong: saved.takeoffLong ?? null,
+          isLoading: false,
+        });
       } else {
         set({ isLoading: false });
       }
