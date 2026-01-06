@@ -13,7 +13,7 @@ interface FlightStateData {
 interface FlightState extends FlightStateData {
   isLoading: boolean;
   startFlight: () => Promise<void>;
-  endFlight: () => Promise<void>;
+  endFlight: (landingType?: "NORMAL" | "FORCED") => Promise<void>;
   restoreState: () => Promise<void>;
 }
 
@@ -36,7 +36,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
     }
   },
 
-  endFlight: async () => {
+  endFlight: async (landingType: "NORMAL" | "FORCED" = "NORMAL") => {
     const { isFlying, takeoffTime } = get();
 
     if (!isFlying || !takeoffTime) return;
@@ -46,7 +46,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
       await Database.addTrack({
         takeoffTime: new Date(takeoffTime).toISOString(),
         landingTime: new Date().toISOString(),
-        landingType: "NORMAL",
+        landingType: landingType,
       });
 
       // 2. Clear from KV

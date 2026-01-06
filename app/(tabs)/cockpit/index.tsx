@@ -54,9 +54,20 @@ export default function CockpitScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <TouchableOpacity style={[styles.button, { backgroundColor: isFlying ? "#ff4444" : "#44cc44" }]} onPress={isFlying ? endFlight : startFlight} activeOpacity={0.8}>
-        <Text style={styles.buttonText}>{isFlying ? "降落" : "开始起飞"}</Text>
-      </TouchableOpacity>
+      {!isFlying ? (
+        <TouchableOpacity style={[styles.button, { backgroundColor: "#44cc44" }]} onPress={startFlight} activeOpacity={0.8}>
+          <Text style={styles.buttonText}>开始起飞</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={[styles.button, { backgroundColor: "#ff4444" }]} onPress={() => endFlight("NORMAL")} activeOpacity={0.8}>
+            <Text style={styles.buttonText}>成功降落</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.forcedButton]} onPress={() => endFlight("FORCED")} activeOpacity={0.8}>
+            <Text style={styles.forcedButtonText}>紧急迫降</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {isFlying && takeoffTime && (
         <View style={styles.infoContainer}>
@@ -84,10 +95,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  buttonContainer: {
+    alignItems: "center",
+    gap: 16,
+  },
   buttonText: {
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
+  },
+  forcedButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  forcedButtonText: {
+    color: "#ff4444",
+    fontSize: 16,
+    fontWeight: "bold",
+    textDecorationLine: "underline",
   },
   infoContainer: {
     marginTop: 30,
