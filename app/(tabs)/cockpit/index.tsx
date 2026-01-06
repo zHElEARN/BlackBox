@@ -1,42 +1,67 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useFlightStore } from "@/store/flightStore";
-import { Database } from "@/utils/database";
+
+const getDuration = (startTime: number | null, now: number) => {
+  if (!startTime) return "00:00:00";
+  const diff = Math.max(0, now - startTime);
+
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+
+  const fmt = (n: number) => n.toString().padStart(2, "0");
+  return `${fmt(hours)}:${fmt(minutes)}:${fmt(seconds)}`;
+};
 
 export default function CockpitScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
-  const { isFlying, takeoffTime, startFlight, endFlight } = useFlightStore();
+  const { isFlying, takeoffTime, isLoading, startFlight, endFlight } = useFlightStore();
 
-  const handleLanding = async () => {
-    if (!takeoffTime) return;
+  const [now, setNow] = useState(Date.now());
 
-    try {
-      await Database.addTrack({
-        takeoffTime: new Date(takeoffTime).toISOString(),
-        landingTime: new Date().toISOString(),
-        landingType: "NORMAL",
-      });
-      endFlight();
-      Alert.alert("降落成功", "飞行记录已保存");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("错误", "保存飞行记录失败");
-    }
-  };
+  useFocusEffect(
+    useCallback(() => {
+      let interval: ReturnType<typeof setInterval>;
+
+      if (isFlying) {
+        setNow(Date.now()); // 聚焦时立即校准一次
+        interval = setInterval(() => {
+          setNow(Date.now());
+        }, 1000);
+      }
+
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }, [isFlying])
+  );
+
+  const duration = isFlying ? getDuration(takeoffTime, now) : "00:00:00";
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.text} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <TouchableOpacity style={[styles.button, { backgroundColor: isFlying ? "#ff4444" : "#44cc44" }]} onPress={isFlying ? handleLanding : startFlight} activeOpacity={0.8}>
+      <TouchableOpacity style={[styles.button, { backgroundColor: isFlying ? "#ff4444" : "#44cc44" }]} onPress={isFlying ? endFlight : startFlight} activeOpacity={0.8}>
         <Text style={styles.buttonText}>{isFlying ? "降落" : "开始起飞"}</Text>
       </TouchableOpacity>
 
       {isFlying && takeoffTime && (
         <View style={styles.infoContainer}>
-          <Text style={[styles.infoLabel, { color: theme.text }]}>起飞时间</Text>
-          <Text style={[styles.infoValue, { color: theme.text }]}>{new Date(takeoffTime).toLocaleTimeString()}</Text>
+          <Text style={[styles.timer, { color: theme.text }]}>{duration}</Text>
+          <Text style={[styles.infoLabel, { color: theme.text }]}>起飞时间: {new Date(takeoffTime).toLocaleTimeString()}</Text>
         </View>
       )}
     </View>
@@ -67,6 +92,12 @@ const styles = StyleSheet.create({
   infoContainer: {
     marginTop: 30,
     alignItems: "center",
+  },
+  timer: {
+    fontSize: 48,
+    fontWeight: "bold",
+    fontVariant: ["tabular-nums"],
+    marginBottom: 10,
   },
   infoLabel: {
     fontSize: 16,

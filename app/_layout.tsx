@@ -11,13 +11,15 @@ export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
+import { useFlightStore } from "@/store/flightStore";
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
     Database.init().catch(console.error);
+    useFlightStore.getState().restoreState();
   }, []);
-
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
