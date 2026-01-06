@@ -57,7 +57,20 @@ export function FlightRecordCard({ track, style, onPress, onLongPress }: FlightR
   };
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={handlePress} onLongPress={handleLongPress} style={[styles.card, { backgroundColor: theme.card }, style]}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.card,
+          borderWidth: colorScheme === "light" ? 1 : 0,
+          borderColor: "rgba(0,0,0,0.05)",
+        },
+        style,
+      ]}
+    >
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={[styles.flightId, { color: theme.tint }]}>#{track.id}</Text>
@@ -90,7 +103,9 @@ export function FlightRecordCard({ track, style, onPress, onLongPress }: FlightR
           <Text style={[styles.durationLabel, { color: theme.icon }]}>{calculateDuration()}</Text>
           <View style={styles.pathVisual}>
             <View style={[styles.pathLine, { backgroundColor: theme.icon, opacity: 0.2 }]} />
-            <MaterialCommunityIcons name="airplane" size={24} color={theme.tint} style={styles.planeIcon} />
+            <View style={styles.planeIconContainer}>
+              <MaterialCommunityIcons name="airplane" size={24} color={theme.tint} />
+            </View>
             <View style={[styles.pathLine, { backgroundColor: theme.icon, opacity: 0.2 }]} />
           </View>
         </View>
@@ -115,10 +130,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   header: {
     flexDirection: "row",
@@ -192,7 +207,7 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     borderRadius: 1,
   },
-  planeIcon: {
+  planeIconContainer: {
     marginHorizontal: 4,
     transform: [{ rotate: "45deg" }],
   },
