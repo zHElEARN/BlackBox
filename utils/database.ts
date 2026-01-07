@@ -165,6 +165,46 @@ export const Database = {
       if (!isNaN(d)) weeklyDistribution[d] = item.count;
     });
 
+    // 5. 最近10次飞行体验评分 (flightExperience)
+    const recentExperienceRes = await db
+      .select({
+        experience: flightTracks.flightExperience,
+      })
+      .from(flightTracks)
+      .orderBy(desc(flightTracks.takeoffTime))
+      .limit(10);
+
+    const recentExperience = recentExperienceRes
+      .map((r) => r.experience)
+      .filter((e): e is number => e !== null)
+      .reverse(); // 翻转为按时间正序 (旧 -> 新)
+
+    // 6. 降落状态占比
+    const landingStatsRes = await db
+      .select({
+        type: flightTracks.landingType,
+        count: sql<number>`count(*)`,
+      })
+      .from(flightTracks)
+      .groupBy(flightTracks.landingType);
+
+    let normalLandings = 0;
+    let forcedLandings = 0;
+
+    landingStatsRes.forEach((item) => {
+      if (item.type === "NORMAL") normalLandings = item.count;
+      if (item.type === "FORCED") forcedLandings = item.count;
+    });
+
+    // 7. 体验均值
+    const avgExpRes = await db
+      .select({
+        avg: sql<number>`avg(${flightTracks.flightExperience})`,
+      })
+      .from(flightTracks);
+
+    const avgExperience = avgExpRes[0]?.avg ?? 0;
+
     return {
       totalFlightHours: totalFlightHours,
       totalMissions: totalMissions,
@@ -172,6 +212,12 @@ export const Database = {
       avgDurationMinutes: avgDurationSeconds / 60,
       hourlyDistribution,
       weeklyDistribution,
+      recentExperience,
+      landingStats: {
+        normal: normalLandings,
+        forced: forcedLandings,
+      },
+      avgExperience,
     };
   },
 };

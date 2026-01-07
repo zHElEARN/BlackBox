@@ -1,5 +1,6 @@
 import { DepartureWindows } from "@/components/radar/departure-windows";
 import { FlightHUD } from "@/components/radar/flight-hud";
+import { FlightPerformance } from "@/components/radar/flight-performance";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Database } from "@/utils/database";
@@ -14,6 +15,12 @@ interface RadarStats {
   avgDurationMinutes: number;
   hourlyDistribution: number[];
   weeklyDistribution: number[];
+  recentExperience: number[];
+  landingStats: {
+    normal: number;
+    forced: number;
+  };
+  avgExperience: number;
 }
 
 export default function RadarScreen() {
@@ -52,6 +59,7 @@ export default function RadarScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <FlightHUD stats={stats} theme={theme} />
         <DepartureWindows stats={stats} theme={theme} />
+        <FlightPerformance stats={stats} theme={theme} />
       </ScrollView>
     </View>
   );
