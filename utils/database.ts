@@ -1,6 +1,6 @@
 import { flightTracks, NewFlightTrack } from "@/db/schema";
 import migrations from "@/drizzle/migrations";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import * as SQLite from "expo-sqlite";
@@ -67,5 +67,39 @@ export const Database = {
     }
 
     return await db.update(flightTracks).set(updateData).where(eq(flightTracks.id, id));
+  },
+
+  /**
+   * 获取最后一次飞行记录
+   */
+  async getLastFlight() {
+    const results = await db.select().from(flightTracks).orderBy(desc(flightTracks.takeoffTime)).limit(1);
+    return results[0] || null;
+  },
+
+  /**
+   * 获取飞行统计数据
+   */
+  async getFlightStats() {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    // 下个月第一天，用于查询当月结束
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const startOfNextMonth = nextMonth.toISOString();
+
+    // 明天，用于查询当天结束
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const startOfTomorrow = tomorrow.toISOString();
+
+    const todayCount = await db.$count(flightTracks, and(gte(flightTracks.takeoffTime, startOfToday), lt(flightTracks.takeoffTime, startOfTomorrow)));
+
+    const monthCount = await db.$count(flightTracks, and(gte(flightTracks.takeoffTime, startOfMonth), lt(flightTracks.takeoffTime, startOfNextMonth)));
+
+    return {
+      today: todayCount,
+      month: monthCount,
+    };
   },
 };

@@ -12,6 +12,11 @@ interface FlightStateData {
   takeoffLat: number | null;
   takeoffLong: number | null;
   takeoffLocation: string | null;
+  lastFlight: any | null; // Replace 'any' with proper type if possible, or keep loose for now to avoid circular deps
+  stats: {
+    today: number;
+    month: number;
+  };
 }
 
 interface FlightState extends FlightStateData {
@@ -19,7 +24,9 @@ interface FlightState extends FlightStateData {
   loadingMessage: string | null;
   startFlight: () => Promise<void>;
   endFlight: (landingType?: "NORMAL" | "FORCED") => Promise<number | undefined>;
+  discardFlight: () => Promise<void>;
   restoreState: () => Promise<void>;
+  loadStats: () => Promise<void>;
 }
 
 export const useFlightStore = create<FlightState>((set, get) => ({
@@ -28,8 +35,22 @@ export const useFlightStore = create<FlightState>((set, get) => ({
   takeoffLat: null,
   takeoffLong: null,
   takeoffLocation: null,
+  lastFlight: null,
+  stats: {
+    today: 0,
+    month: 0,
+  },
   isLoading: true,
   loadingMessage: null,
+
+  loadStats: async () => {
+    try {
+      const [lastFlight, stats] = await Promise.all([Database.getLastFlight(), Database.getFlightStats()]);
+      set({ lastFlight, stats });
+    } catch (e) {
+      console.error("Failed to load stats:", e);
+    }
+  },
 
   startFlight: async () => {
     set({ isLoading: true, loadingMessage: "正在准备起飞..." });
@@ -49,7 +70,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
       }
 
       const now = Date.now();
-      const newState: FlightStateData = {
+      const newState: Partial<FlightStateData> = {
         isFlying: true,
         takeoffTime: now,
         takeoffLat: location?.latitude ?? null,
@@ -64,6 +85,28 @@ export const useFlightStore = create<FlightState>((set, get) => ({
       console.error("Failed to start flight:", e);
       set({ isLoading: false, loadingMessage: null });
       Alert.alert("错误", "启动飞行记录失败");
+    }
+  },
+
+  discardFlight: async () => {
+    set({ isLoading: true, loadingMessage: "正在放弃记录..." });
+    try {
+      // 1. 清理 KV
+      await Storage.remove(STORAGE_KEY);
+
+      // 2. 更新状态
+      set({
+        isFlying: false,
+        takeoffTime: null,
+        takeoffLat: null,
+        takeoffLong: null,
+        takeoffLocation: null,
+        isLoading: false,
+        loadingMessage: null,
+      });
+    } catch (e) {
+      console.error("Failed to discard flight:", e);
+      set({ isLoading: false, loadingMessage: null });
     }
   },
 
@@ -103,7 +146,9 @@ export const useFlightStore = create<FlightState>((set, get) => ({
       // 3. 清理 KV
       await Storage.remove(STORAGE_KEY);
 
-      // 4. 更新状态
+      // 4. 更新状态 并 刷新统计
+      await get().loadStats();
+
       set({
         isFlying: false,
         takeoffTime: null,
@@ -125,6 +170,9 @@ export const useFlightStore = create<FlightState>((set, get) => ({
 
   restoreState: async () => {
     try {
+      // 先加载统计数据
+      await get().loadStats();
+
       const saved = await Storage.get<FlightStateData>(STORAGE_KEY);
       if (saved && saved.isFlying && saved.takeoffTime) {
         set({

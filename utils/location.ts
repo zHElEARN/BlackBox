@@ -90,3 +90,26 @@ export const LocationService = {
     });
   },
 };
+
+export const getCityName = (locationStr: string | null) => {
+  if (!locationStr) return "未知";
+  try {
+    const addr = JSON.parse(locationStr);
+    return addr.city || addr.district || "未知位置";
+  } catch (e) {
+    return "未知";
+  }
+};
+
+export const formatLocation = (locationStr: string | null) => {
+  if (!locationStr) return "未知位置";
+  try {
+    const addr = JSON.parse(locationStr);
+    if (addr && (addr.city || addr.district || addr.street)) {
+      return `${addr.city || ""}${addr.district || ""}${addr.street || ""}`.trim();
+    }
+    return locationStr;
+  } catch (e) {
+    return locationStr;
+  }
+};
