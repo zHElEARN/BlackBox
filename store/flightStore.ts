@@ -18,7 +18,7 @@ interface FlightState extends FlightStateData {
   isLoading: boolean;
   loadingMessage: string | null;
   startFlight: () => Promise<void>;
-  endFlight: (landingType?: "NORMAL" | "FORCED") => Promise<void>;
+  endFlight: (landingType?: "NORMAL" | "FORCED") => Promise<number | undefined>;
   restoreState: () => Promise<void>;
 }
 
@@ -88,7 +88,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
 
       // 2. 保存到 SQLite
       set({ loadingMessage: "正在保存记录..." });
-      await Database.addTrack({
+      const id = await Database.addTrack({
         takeoffTime: new Date(takeoffTime).toISOString(),
         landingTime: new Date().toISOString(),
         takeoffLat: takeoffLat,
@@ -113,10 +113,13 @@ export const useFlightStore = create<FlightState>((set, get) => ({
         isLoading: false,
         loadingMessage: null,
       });
+
+      return id;
     } catch (error) {
       console.error("Failed to end flight:", error);
       set({ isLoading: false, loadingMessage: null });
       Alert.alert("错误", "保存飞行记录失败");
+      return undefined;
     }
   },
 

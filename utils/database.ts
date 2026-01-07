@@ -54,4 +54,11 @@ export const Database = {
     const results = await db.select().from(flightTracks).where(eq(flightTracks.id, id));
     return results[0] || null;
   },
+
+  /**
+   * 更新航迹记录
+   */
+  async updateTrack(id: number, data: Partial<NewFlightTrack>) {
+    return await db.update(flightTracks).set(data).where(eq(flightTracks.id, id));
+  },
 };

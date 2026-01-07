@@ -1,4 +1,4 @@
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -22,6 +22,7 @@ export default function CockpitScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
   const { isFlying, takeoffTime, isLoading, loadingMessage, startFlight, endFlight } = useFlightStore();
+  const router = useRouter();
 
   const [now, setNow] = useState(Date.now());
 
@@ -53,6 +54,17 @@ export default function CockpitScreen() {
     );
   }
 
+  const handleEndFlight = async (type: "NORMAL" | "FORCED") => {
+    const trackId = await endFlight(type);
+    if (trackId) {
+      // Navigate to finish screen
+      router.push({
+        pathname: "/flight-log/finish",
+        params: { id: trackId },
+      });
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {!isFlying ? (
@@ -61,10 +73,14 @@ export default function CockpitScreen() {
         </TouchableOpacity>
       ) : (
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={[styles.button, { backgroundColor: "#ff4444" }]} onPress={() => endFlight("NORMAL")} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: "#ff4444" }]}
+            onPress={() => handleEndFlight("NORMAL")}
+            activeOpacity={0.8}
+          >
             <Text style={styles.buttonText}>成功降落</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.forcedButton]} onPress={() => endFlight("FORCED")} activeOpacity={0.8}>
+          <TouchableOpacity style={[styles.forcedButton]} onPress={() => handleEndFlight("FORCED")} activeOpacity={0.8}>
             <Text style={styles.forcedButtonText}>紧急迫降</Text>
           </TouchableOpacity>
         </View>

@@ -103,6 +103,24 @@ export default function FlightDetailScreen() {
         </View>
       </View>
 
+      {/* 飞行评价 */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.icon }]}>飞行评价</Text>
+        <View style={[styles.ratingContainer, { backgroundColor: theme.card }]}>
+          <View style={styles.starsRow}>
+            {[1, 2, 3, 4, 5].map((star) => {
+              const rating = (track.flightExperience || 0) / 2;
+              let iconName: keyof typeof Ionicons.glyphMap = "star-outline";
+              if (rating >= star) iconName = "star";
+              else if (rating >= star - 0.5) iconName = "star-half";
+
+              return <Ionicons key={star} name={iconName} size={24} color={track.flightExperience ? "#FFD700" : theme.icon} style={{ marginRight: 4 }} />;
+            })}
+          </View>
+          <Text style={[styles.ratingScore, { color: theme.text }]}>{track.flightExperience !== null && track.flightExperience !== undefined ? `${track.flightExperience}分` : "未评分"}</Text>
+        </View>
+      </View>
+
       {/* 备注信息 */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: theme.icon }]}>飞行备注</Text>
@@ -175,5 +193,20 @@ const styles = StyleSheet.create({
   noteText: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderRadius: 16,
+  },
+  starsRow: {
+    flexDirection: "row",
+  },
+  ratingScore: {
+    fontSize: 20,
+    fontWeight: "bold",
+    fontVariant: ["tabular-nums"],
   },
 });
