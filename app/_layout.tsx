@@ -97,6 +97,7 @@ export default function RootLayout() {
         <Stack.Screen name="flight-log/finish" options={{ presentation: "modal", headerShown: false }} />
         <Stack.Screen name="flight-detail/[id]" options={{ title: "飞行详情", headerBackTitle: "返回" }} />
         <Stack.Screen name="flight-detail/edit/[id]" options={{ title: "编辑飞行数据", headerBackTitle: "取消" }} />
+        <Stack.Screen name="flight-add/index" options={{ title: "手动记录飞行", headerBackTitle: "取消" }} />
       </Stack>
       <BiometricLockScreen />
       <StatusBar style="auto" />

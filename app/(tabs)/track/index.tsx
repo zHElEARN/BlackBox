@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { FlightRecordCard } from "@/components/flight-record-card";
 import { Colors } from "@/constants/theme";
@@ -74,6 +74,15 @@ export default function TrackScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity onPress={() => router.push("/flight-add")} style={styles.headerRightBtn}>
+              <Ionicons name="add" size={28} color={theme.tint} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       {tracks.length > 0 ? (
         <FlatList data={tracks} renderItem={renderItem} keyExtractor={(item) => item.id.toString()} contentContainerStyle={styles.listContent} />
       ) : (
@@ -91,8 +100,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    flexGrow: 1,
     padding: 16,
+  },
+  headerRightBtn: {
+    marginRight: 16,
+    padding: 4,
   },
   emptyContainer: {
     flex: 1,
