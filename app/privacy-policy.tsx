@@ -64,7 +64,7 @@ export default function PrivacyPolicyScreen() {
         {isForced && (
           <View style={styles.footer}>
             <TouchableOpacity style={[styles.button, { backgroundColor: theme.tint }]} onPress={handleAgree} activeOpacity={0.8}>
-              <Text style={styles.buttonText}>同意并继续</Text>
+              <Text style={[styles.buttonText, { color: colorScheme === "dark" ? "#000" : "#fff" }]}>同意并继续</Text>
             </TouchableOpacity>
           </View>
         )}
