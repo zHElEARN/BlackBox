@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { FlightRecordCard } from "@/components/flight-record-card";
 import { Colors } from "@/constants/theme";
@@ -11,26 +11,30 @@ import { Database } from "@/utils/database";
 
 export default function FlightDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
 
   const [track, setTrack] = useState<FlightTrack | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadTrack = async () => {
-      if (!id) return;
-      try {
-        const data = await Database.getTrackById(Number(id));
-        setTrack(data);
-      } catch (error) {
-        console.error("Failed to load track:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadTrack();
+  const loadTrack = useCallback(async () => {
+    if (!id) return;
+    try {
+      const data = await Database.getTrackById(Number(id));
+      setTrack(data);
+    } catch (error) {
+      console.error("Failed to load track:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTrack();
+    }, [loadTrack])
+  );
 
   if (loading) {
     return (
@@ -69,7 +73,20 @@ export default function FlightDetailScreen() {
         options={{
           title: `详情 #${track.id}`,
           headerTintColor: theme.text,
-          headerBackTitle: "返回",
+          headerBackTitle: "返回", // 这一行控制“下一个”页面的返回文字
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/flight-detail/edit/[id]",
+                  params: { id: id },
+                } as any)
+              }
+              style={styles.headerRightBtn}
+            >
+              <Ionicons name="create-outline" size={24} color={theme.tint} />
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -138,6 +155,11 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+  },
+  headerRightBtn: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
   },
   cardOverride: {
     marginBottom: 24,

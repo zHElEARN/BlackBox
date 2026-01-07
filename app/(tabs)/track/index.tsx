@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
@@ -29,6 +30,14 @@ export default function TrackScreen() {
     }, [])
   );
 
+  // 为详情页准备返回文字
+  const goToDetail = (track: FlightTrack) => {
+    router.push({
+      pathname: "/flight-detail/[id]",
+      params: { id: track.id.toString() },
+    } as any);
+  };
+
   const handleLongPress = (track: FlightTrack) => {
     Alert.alert("请选择操作", `飞行记录 #${track.id}`, [
       {
@@ -55,9 +64,7 @@ export default function TrackScreen() {
       },
       {
         text: "查看详情",
-        onPress: () => {
-          router.push(`/flight-detail/${track.id}`);
-        },
+        onPress: () => goToDetail(track),
       },
       { text: "取消", style: "cancel" },
     ]);
@@ -67,17 +74,14 @@ export default function TrackScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <FlatList
-        data={tracks}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: theme.icon }]}>暂无飞行记录</Text>
-          </View>
-        }
-      />
+      {tracks.length > 0 ? (
+        <FlatList data={tracks} renderItem={renderItem} keyExtractor={(item) => item.id.toString()} contentContainerStyle={styles.listContent} />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="airplane-outline" size={64} color={theme.icon} style={styles.emptyIcon} />
+          <Text style={[styles.emptyText, { color: theme.icon }]}>暂无飞行记录</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -87,16 +91,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
+    flexGrow: 1,
     padding: 16,
   },
   emptyContainer: {
     flex: 1,
-    paddingVertical: 40,
     alignItems: "center",
     justifyContent: "center",
   },
+  emptyIcon: {
+    marginBottom: 20,
+    opacity: 0.4,
+  },
   emptyText: {
-    fontSize: 16,
-    opacity: 0.6,
+    fontSize: 18,
+    fontWeight: "500",
+    opacity: 0.4,
   },
 });
