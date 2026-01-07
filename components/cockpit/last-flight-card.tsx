@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { FlightTrack } from "@/db/schema";
@@ -9,9 +9,10 @@ import { getDuration } from "@/utils/time";
 
 interface LastFlightCardProps {
   lastFlight: FlightTrack | null;
+  onPress?: () => void;
 }
 
-export const LastFlightCard = ({ lastFlight }: LastFlightCardProps) => {
+export const LastFlightCard = ({ lastFlight, onPress }: LastFlightCardProps) => {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
 
@@ -65,7 +66,7 @@ export const LastFlightCard = ({ lastFlight }: LastFlightCardProps) => {
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBackground }]}>
+    <TouchableOpacity style={[styles.card, { backgroundColor: cardBackground }]} activeOpacity={0.8} onPress={onPress}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <MaterialCommunityIcons name="history" size={18} color={theme.tint} style={{ marginRight: 6 }} />
@@ -106,7 +107,7 @@ export const LastFlightCard = ({ lastFlight }: LastFlightCardProps) => {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

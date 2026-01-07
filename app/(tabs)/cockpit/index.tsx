@@ -62,7 +62,14 @@ export default function CockpitScreen() {
             <GreetingHeader now={now} />
 
             <View style={styles.statsContainer}>
-              <LastFlightCard lastFlight={lastFlight} />
+              <LastFlightCard
+                lastFlight={lastFlight}
+                onPress={() => {
+                  if (lastFlight?.id) {
+                    router.push(`/flight-detail/${lastFlight.id}`);
+                  }
+                }}
+              />
               <FlightStats stats={stats} />
             </View>
 

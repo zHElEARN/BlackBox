@@ -6,6 +6,8 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { formatLocation } from "@/utils/location";
 import { getDuration } from "@/utils/time";
 
+import { LongPressButton } from "./long-press-button";
+
 interface ActiveFlightViewProps {
   now: number;
   takeoffTime: number | null;
@@ -98,13 +100,9 @@ export const ActiveFlightView = ({ now, takeoffTime, takeoffLocation, takeoffLat
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, { backgroundColor: "#ff4444" }]} onPress={() => onEndFlight("NORMAL")} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>安全降落</Text>
-        </TouchableOpacity>
+        <LongPressButton title="安全降落" onLongPress={() => onEndFlight("NORMAL")} backgroundColor="#ff4444" duration={2000} buttonStyle={styles.shadowStyle} textStyle={{ fontSize: 24 }} />
 
-        <TouchableOpacity style={[styles.forcedButton]} onPress={() => onEndFlight("FORCED")} activeOpacity={0.8}>
-          <Text style={styles.forcedButtonText}>紧急迫降</Text>
-        </TouchableOpacity>
+        <LongPressButton title="紧急迫降" onLongPress={() => onEndFlight("FORCED")} backgroundColor="transparent" textColor="#ff4444" progressColor="rgba(255, 68, 68, 0.1)" duration={2000} style={{ marginTop: 8 }} textStyle={{ fontSize: 16 }} />
 
         <TouchableOpacity style={styles.discardButton} onPress={handleDiscardPress} activeOpacity={0.8}>
           <Text style={[styles.discardButtonText, { color: textSecondary }]}>放弃记录</Text>
@@ -191,31 +189,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
-  button: {
-    paddingHorizontal: 40,
-    paddingVertical: 20,
-    borderRadius: 50,
+  shadowStyle: {
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    width: "100%",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  forcedButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  forcedButtonText: {
-    color: "#ff4444",
-    fontSize: 14,
-    fontWeight: "bold",
   },
   discardButton: {
     marginTop: 10,
