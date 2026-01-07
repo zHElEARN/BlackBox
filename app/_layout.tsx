@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo } from "react";
 import "react-native-reanimated";
@@ -8,12 +8,15 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useFlightStore } from "@/store/flightStore";
 import { Database } from "@/utils/database";
+import { Storage } from "@/utils/storage";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
 export default function RootLayout() {
+  const router = useRouter();
+
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
 
@@ -32,21 +35,36 @@ export default function RootLayout() {
   }, [colorScheme, theme]);
 
   useEffect(() => {
-    Database.init().catch(console.error);
-    useFlightStore.getState().restoreState();
+    async function prepare() {
+      try {
+        await Database.init();
+        await useFlightStore.getState().restoreState();
+
+        const hasAgreed = await Storage.get<boolean>("has_agreed_privacy");
+        if (!hasAgreed) {
+          setTimeout(() => {
+            router.replace("/privacy-policy?showAgree=true");
+          }, 0);
+        }
+      } catch (e) {
+        console.error("Initialization failed", e);
+      }
+    }
+
+    prepare();
   }, []);
 
   return (
     <ThemeProvider value={navigationTheme}>
       <Stack
         screenOptions={{
-          // contentStyle 是防止跳转闪白的核武器：强制设置每一层 screen 的底色
           contentStyle: { backgroundColor: theme.background },
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy-policy" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

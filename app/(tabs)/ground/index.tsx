@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -6,6 +7,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function GroundScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
   const insets = useSafeAreaInsets();
@@ -54,7 +56,7 @@ export default function GroundScreen() {
 
       <Section title="关于">
         <SettingItem icon="information-outline" label="关于 BlackBox" />
-        <SettingItem icon="file-document-outline" label="用户协议与隐私政策" />
+        <SettingItem icon="file-document-outline" label="用户协议与隐私政策" onPress={() => router.push("/privacy-policy")} />
         <SettingItem icon="cloud-download-outline" label="检查更新" value="v1.0.0" isLast={true} />
       </Section>
 
