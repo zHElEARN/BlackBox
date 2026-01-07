@@ -26,6 +26,7 @@ export function FlightPerformance({ stats, theme }: FlightPerformanceProps) {
   const forcedPercent = totalLandings > 0 ? (landingStats.forced / totalLandings) * 100 : 0;
 
   const showWarning = forcedRate > 0.2; // Alert if > 20% forced landings
+  const isDark = theme.text === Colors.dark.text;
 
   return (
     <View style={styles.sectionContainer}>
@@ -114,8 +115,16 @@ export function FlightPerformance({ stats, theme }: FlightPerformanceProps) {
 
       {/* Warning Message */}
       {showWarning && (
-        <View style={[styles.warningContainer, { backgroundColor: "#FEF2F2", borderColor: "#FECACA" }]}>
-          <Text style={[styles.warningText, { color: "#991B1B" }]}>⚠️ 检测到近期飞行环境不稳定，请注意维护</Text>
+        <View
+          style={[
+            styles.warningContainer,
+            {
+              backgroundColor: isDark ? "rgba(127, 29, 29, 0.4)" : "#FEF2F2",
+              borderColor: isDark ? "rgba(248, 113, 113, 0.2)" : "#FECACA",
+            },
+          ]}
+        >
+          <Text style={[styles.warningText, { color: isDark ? "#FECACA" : "#991B1B" }]}>⚠️ 检测到近期飞行环境不稳定，请注意维护</Text>
         </View>
       )}
     </View>
