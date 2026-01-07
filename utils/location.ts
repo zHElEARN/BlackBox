@@ -113,3 +113,37 @@ export const formatLocation = (locationStr: string | null) => {
     return locationStr;
   }
 };
+
+export const AMAP_WEB_KEY = "4c627a9b25337a2bde8e6e57203b6d7c"; // 请在此处填写高德地图Web服务Key
+
+export const reverseGeocode = async (latitude: number, longitude: number) => {
+  if (!AMAP_WEB_KEY) {
+    console.warn("AMAP_WEB_KEY is empty");
+    return null;
+  }
+  try {
+    const response = await fetch(`https://restapi.amap.com/v3/geocode/regeo?output=json&location=${longitude},${latitude}&key=${AMAP_WEB_KEY}&radius=1000&extensions=all`);
+    const data = await response.json();
+    if (data.status === "1" && data.regeocode) {
+      const component = data.regeocode.addressComponent;
+
+      // 处理直辖市 city 为空的情况 (例如上海市，city可能为空数组或空字符串，此时使用province)
+      let city = component.city;
+      if (!city || (Array.isArray(city) && city.length === 0)) {
+        city = component.province;
+      }
+
+      return JSON.stringify({
+        country: component.country,
+        province: component.province,
+        city: city,
+        district: component.district,
+        street: component.streetNumber?.street || "",
+        formattedAddress: data.regeocode.formatted_address,
+      });
+    }
+  } catch (e) {
+    console.error("Reverse geocoding failed:", e);
+  }
+  return null;
+};

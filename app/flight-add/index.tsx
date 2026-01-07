@@ -4,9 +4,11 @@ import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
+import { LocationPickerModal } from "@/components/flight-add/location-picker-modal";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Database } from "@/utils/database";
+import { formatLocation } from "@/utils/location";
 
 export default function AddFlightScreen() {
   const router = useRouter();
@@ -39,6 +41,25 @@ export default function AddFlightScreen() {
   const [rating, setRating] = useState(0);
   const [landingType, setLandingType] = useState<"NORMAL" | "FORCED">("NORMAL");
 
+  // Location Picker State
+  const [takeoffLocation, setTakeoffLocation] = useState<{ latitude: number; longitude: number; address: string } | null>(null);
+  const [landingLocation, setLandingLocation] = useState<{ latitude: number; longitude: number; address: string } | null>(null);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerType, setPickerType] = useState<"takeoff" | "landing">("takeoff");
+
+  const openLocationPicker = (type: "takeoff" | "landing") => {
+    setPickerType(type);
+    setPickerVisible(true);
+  };
+
+  const handleLocationSelect = (location: { latitude: number; longitude: number; address: string }) => {
+    if (pickerType === "takeoff") {
+      setTakeoffLocation(location);
+    } else {
+      setLandingLocation(location);
+    }
+  };
+
   const handleSave = async () => {
     if (!takeoffDate || !landingDate) {
       Alert.alert("错误", "请填写完整的起飞和降落时间");
@@ -58,13 +79,13 @@ export default function AddFlightScreen() {
         note: note.trim() || null,
         flightExperience: rating > 0 ? Math.round(rating * 2) : null,
         landingType,
-        // 其他字段留空
-        takeoffLat: null,
-        takeoffLong: null,
-        takeoffLocation: null,
-        landingLat: null,
-        landingLong: null,
-        landingLocation: null,
+
+        takeoffLat: takeoffLocation?.latitude ?? null,
+        takeoffLong: takeoffLocation?.longitude ?? null,
+        takeoffLocation: takeoffLocation?.address ?? null,
+        landingLat: landingLocation?.latitude ?? null,
+        landingLong: landingLocation?.longitude ?? null,
+        landingLocation: landingLocation?.address ?? null,
       });
       router.back();
     } catch (error) {
@@ -106,11 +127,6 @@ export default function AddFlightScreen() {
         />
 
         <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.infoBanner}>
-            <Ionicons name="information-circle-outline" size={20} color={theme.icon} />
-            <Text style={[styles.infoText, { color: theme.icon }]}>此处手动录入的飞行记录将不包含GPS轨迹信息</Text>
-          </View>
-
           {/* Time Section */}
           <View style={styles.section}>
             <Text style={[styles.label, { color: theme.text }]}>起飞与降落时间</Text>
@@ -132,6 +148,15 @@ export default function AddFlightScreen() {
                 </View>
               </View>
 
+              {/* Takeoff Location Display */}
+              <TouchableOpacity style={styles.locationRow} onPress={() => openLocationPicker("takeoff")}>
+                <Ionicons name="location-sharp" size={16} color={takeoffLocation ? theme.tint : theme.icon} />
+                <Text style={[styles.locationText, { color: takeoffLocation ? theme.text : theme.icon }]} numberOfLines={1}>
+                  {takeoffLocation ? formatLocation(takeoffLocation.address) || "已选择位置" : "添加起飞地点"}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={theme.icon} style={{ opacity: 0.5 }} />
+              </TouchableOpacity>
+
               <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
               {/* Landing Row */}
@@ -149,6 +174,15 @@ export default function AddFlightScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+
+              {/* Landing Location Display */}
+              <TouchableOpacity style={styles.locationRow} onPress={() => openLocationPicker("landing")}>
+                <Ionicons name="location-sharp" size={16} color={landingLocation ? theme.tint : theme.icon} />
+                <Text style={[styles.locationText, { color: landingLocation ? theme.text : theme.icon }]} numberOfLines={1}>
+                  {landingLocation ? formatLocation(landingLocation.address) || "已选择位置" : "添加降落地点"}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={theme.icon} style={{ opacity: 0.5 }} />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -215,6 +249,8 @@ export default function AddFlightScreen() {
             <TextInput style={[styles.input, styles.textArea, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} value={note} onChangeText={setNote} placeholder="添加备注..." placeholderTextColor={theme.icon} multiline numberOfLines={4} textAlignVertical="top" />
           </View>
         </ScrollView>
+
+        <LocationPickerModal visible={pickerVisible} onClose={() => setPickerVisible(false)} onSelect={handleLocationSelect} title={pickerType === "takeoff" ? "选择起飞地点" : "选择降落地点"} initialLocation={pickerType === "takeoff" ? takeoffLocation : landingLocation} />
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
@@ -226,20 +262,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-  },
-  infoBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    backgroundColor: "rgba(0,0,0,0.05)",
-    padding: 12,
-    borderRadius: 12,
-    gap: 8,
-  },
-  infoText: {
-    fontSize: 13,
-    flex: 1,
-    opacity: 0.8,
   },
   headerRightBtn: {
     padding: 8,
@@ -345,5 +367,17 @@ const styles = StyleSheet.create({
   pickerTitle: {
     fontSize: 15,
     fontWeight: "600",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    gap: 8,
+    marginTop: 4,
+    paddingLeft: 26, // align with text label
+  },
+  locationText: {
+    fontSize: 13,
+    flex: 1,
   },
 });
