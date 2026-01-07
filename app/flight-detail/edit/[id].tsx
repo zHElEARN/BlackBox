@@ -4,9 +4,11 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
+import { LocationPickerModal } from "@/components/flight-add/location-picker-modal";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Database } from "@/utils/database";
+import { formatLocation } from "@/utils/location";
 
 export default function EditFlightScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,6 +22,12 @@ export default function EditFlightScreen() {
   // Form states
   const [takeoffDate, setTakeoffDate] = useState<Date>(new Date());
   const [landingDate, setLandingDate] = useState<Date>(new Date());
+
+  // Location Picker State
+  const [takeoffLocation, setTakeoffLocation] = useState<{ latitude: number; longitude: number; address: string } | null>(null);
+  const [landingLocation, setLandingLocation] = useState<{ latitude: number; longitude: number; address: string } | null>(null);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [pickerType, setPickerType] = useState<"takeoff" | "landing">("takeoff");
 
   // Picker visibility
   const [showPicker, setShowPicker] = useState<{
@@ -50,6 +58,22 @@ export default function EditFlightScreen() {
           setNote(data.note || "");
           setRating((data.flightExperience || 0) / 2);
           setLandingType(data.landingType);
+
+          if (data.takeoffLat && data.takeoffLong) {
+            setTakeoffLocation({
+              latitude: data.takeoffLat,
+              longitude: data.takeoffLong,
+              address: data.takeoffLocation || "",
+            });
+          }
+
+          if (data.landingLat && data.landingLong) {
+            setLandingLocation({
+              latitude: data.landingLat,
+              longitude: data.landingLong,
+              address: data.landingLocation || "",
+            });
+          }
         }
       } catch (error) {
         console.error("Failed to load track for editing:", error);
@@ -59,6 +83,19 @@ export default function EditFlightScreen() {
     };
     loadTrack();
   }, [id]);
+
+  const openLocationPicker = (type: "takeoff" | "landing") => {
+    setPickerType(type);
+    setPickerVisible(true);
+  };
+
+  const handleLocationSelect = (location: { latitude: number; longitude: number; address: string }) => {
+    if (pickerType === "takeoff") {
+      setTakeoffLocation(location);
+    } else {
+      setLandingLocation(location);
+    }
+  };
 
   const handleSave = async () => {
     if (!takeoffDate || !landingDate) {
@@ -79,6 +116,12 @@ export default function EditFlightScreen() {
         note: note.trim() || null,
         flightExperience: rating > 0 ? Math.round(rating * 2) : null,
         landingType,
+        takeoffLat: takeoffLocation?.latitude ?? null,
+        takeoffLong: takeoffLocation?.longitude ?? null,
+        takeoffLocation: takeoffLocation?.address ?? null,
+        landingLat: landingLocation?.latitude ?? null,
+        landingLong: landingLocation?.longitude ?? null,
+        landingLocation: landingLocation?.address ?? null,
       });
       router.back();
     } catch (error) {
@@ -146,6 +189,15 @@ export default function EditFlightScreen() {
                   </View>
                 </View>
 
+                {/* Takeoff Location Display */}
+                <TouchableOpacity style={styles.locationRow} onPress={() => openLocationPicker("takeoff")}>
+                  <Ionicons name="location-sharp" size={16} color={takeoffLocation ? theme.tint : theme.icon} />
+                  <Text style={[styles.locationText, { color: takeoffLocation ? theme.text : theme.icon }]} numberOfLines={1}>
+                    {takeoffLocation ? formatLocation(takeoffLocation.address) || "已选择位置" : "添加起飞地点"}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={theme.icon} style={{ opacity: 0.5 }} />
+                </TouchableOpacity>
+
                 <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
                 {/* Landing Row */}
@@ -163,6 +215,15 @@ export default function EditFlightScreen() {
                     </TouchableOpacity>
                   </View>
                 </View>
+
+                {/* Landing Location Display */}
+                <TouchableOpacity style={styles.locationRow} onPress={() => openLocationPicker("landing")}>
+                  <Ionicons name="location-sharp" size={16} color={landingLocation ? theme.tint : theme.icon} />
+                  <Text style={[styles.locationText, { color: landingLocation ? theme.text : theme.icon }]} numberOfLines={1}>
+                    {landingLocation ? formatLocation(landingLocation.address) || "已选择位置" : "添加降落地点"}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={theme.icon} style={{ opacity: 0.5 }} />
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -230,6 +291,8 @@ export default function EditFlightScreen() {
             </View>
           </ScrollView>
         )}
+
+        <LocationPickerModal visible={pickerVisible} onClose={() => setPickerVisible(false)} onSelect={handleLocationSelect} title={pickerType === "takeoff" ? "选择起飞地点" : "选择降落地点"} initialLocation={pickerType === "takeoff" ? takeoffLocation : landingLocation} />
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
@@ -357,5 +420,17 @@ const styles = StyleSheet.create({
   pickerTitle: {
     fontSize: 15,
     fontWeight: "600",
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    gap: 8,
+    marginTop: 4,
+    paddingLeft: 26, // align with text label
+  },
+  locationText: {
+    fontSize: 13,
+    flex: 1,
   },
 });

@@ -33,18 +33,22 @@ export function LocationPickerModal({ visible, onClose, onSelect, initialLocatio
 
   const mapRef = React.useRef<any>(null);
 
-  const moveCameraToLocation = (loc: { latitude: number; longitude: number }) => {
+  const moveCameraToLocation = async (loc: { latitude: number; longitude: number }) => {
     if (mapRef.current) {
-      mapRef.current.moveCamera(
-        {
-          target: {
-            latitude: loc.latitude,
-            longitude: loc.longitude,
+      try {
+        await mapRef.current.moveCamera(
+          {
+            target: {
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            },
+            zoom: 15,
           },
-          zoom: 15,
-        },
-        300
-      );
+          300
+        );
+      } catch (error) {
+        console.warn("Failed to move camera:", error);
+      }
     }
   };
 
