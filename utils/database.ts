@@ -205,6 +205,62 @@ export const Database = {
 
     const avgExperience = avgExpRes[0]?.avg ?? 0;
 
+    // 8. 空间与地理轨迹 (Spatial Distribution)
+    const locationRes = await db
+      .select({
+        takeoff: flightTracks.takeoffLocation,
+        landing: flightTracks.landingLocation,
+      })
+      .from(flightTracks);
+
+    const locationCounts: Record<string, number> = {};
+    const uniqueLocations = new Set<string>();
+
+    const processLoc = (locJson: string | null) => {
+      if (!locJson) return null;
+      try {
+        const parsed = JSON.parse(locJson);
+        // 优先提取: 城市 > 区/县 > 具体地点 > 完整地址
+        let name = "";
+        if (parsed.city) {
+          name = parsed.city;
+          // if (parsed.district) name += " " + parsed.district; // 保持简洁，只看城市？或者城市+区
+        } else if (parsed.district) {
+          name = parsed.district;
+        } else if (parsed.name) {
+          name = parsed.name;
+        } else if (parsed.address) {
+          name = parsed.address;
+        }
+
+        // 如果是类似 "Point 123" 这种无意义的名字，可能需要过滤，这里暂且保留
+        return name ? name.trim() : null;
+      } catch (e) {
+        // 非 JSON 格式，直接使用字符串
+        return locJson.trim() || null;
+      }
+    };
+
+    locationRes.forEach((row) => {
+      const tLoc = processLoc(row.takeoff);
+      const lLoc = processLoc(row.landing);
+
+      if (tLoc) {
+        locationCounts[tLoc] = (locationCounts[tLoc] || 0) + 1;
+        uniqueLocations.add(tLoc);
+      }
+      if (lLoc) {
+        uniqueLocations.add(lLoc);
+      }
+    });
+
+    const topLocations = Object.entries(locationCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Take top 5
+
+    const geoDiversity = uniqueLocations.size;
+
     return {
       totalFlightHours: totalFlightHours,
       totalMissions: totalMissions,
@@ -218,6 +274,8 @@ export const Database = {
         forced: forcedLandings,
       },
       avgExperience,
+      topLocations,
+      geoDiversity,
     };
   },
 
