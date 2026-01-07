@@ -176,7 +176,7 @@ export const Database = {
 
     const recentExperience = recentExperienceRes
       .map((r) => r.experience)
-      .filter((e): e is number => e !== null)
+      .filter((e): e is number => e !== null) // 只要非 null 的
       .reverse(); // 翻转为按时间正序 (旧 -> 新)
 
     // 6. 降落状态占比
@@ -219,5 +219,12 @@ export const Database = {
       },
       avgExperience,
     };
+  },
+
+  /**
+   * 清空所有数据
+   */
+  async clearAllTracks() {
+    return await db.delete(flightTracks);
   },
 };
