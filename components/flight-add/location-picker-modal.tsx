@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-// @ts-ignore
 import { MapView, Marker } from "expo-gaode-map";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -26,6 +26,7 @@ interface LocationPickerModalProps {
 export function LocationPickerModal({ visible, onClose, onSelect, initialLocation, title = "选择位置" }: LocationPickerModalProps) {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
   const [marker, setMarker] = useState<{ latitude: number; longitude: number } | null>(null);
   const [address, setAddress] = useState<string | null>(null);
@@ -149,7 +150,7 @@ export function LocationPickerModal({ visible, onClose, onSelect, initialLocatio
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.container, { backgroundColor: theme.background, paddingTop: Platform.OS === "android" ? insets.top : 0 }]}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: theme.border }]}>
           <TouchableOpacity onPress={onClose} style={styles.headerBtn}>

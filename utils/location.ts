@@ -52,6 +52,12 @@ export const LocationService = {
   async getCurrentLocation(): Promise<{ latitude: number; longitude: number; address?: string } | null> {
     await this.init();
 
+    const hasPermission = await this.requestPermissions();
+    if (!hasPermission) {
+      console.warn("Location permission not granted");
+      return null;
+    }
+
     return new Promise((resolve) => {
       // 5s 超时计时器
       const timer = setTimeout(() => {
