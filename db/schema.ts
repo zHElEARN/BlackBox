@@ -18,6 +18,7 @@ export const flightTracks = sqliteTable("flight_tracks", {
   // 其他
   landingType: text("landing_type", { enum: ["NORMAL", "FORCED"] }).notNull(),
   note: text("note"),
+  flightExperience: integer("flight_experience"),
 });
 
 export type FlightTrack = typeof flightTracks.$inferSelect;

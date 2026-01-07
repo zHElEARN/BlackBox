@@ -9,5 +9,6 @@ CREATE TABLE `flight_tracks` (
 	`landing_long` real,
 	`landing_location` text,
 	`landing_type` text NOT NULL,
-	`note` text
+	`note` text,
+	`flight_experience` integer
 );

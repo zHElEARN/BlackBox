@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7f2f8eda-58bb-4c0a-b552-c351c7df790f",
+  "id": "285af62e-40ab-4d8e-b5d4-014b9a47d33a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "flight_tracks": {
@@ -80,6 +80,13 @@
         "note": {
           "name": "note",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "flight_experience": {
+          "name": "flight_experience",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
