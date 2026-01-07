@@ -26,10 +26,9 @@ export default function PrivacyPolicyScreen() {
       <Stack.Screen
         options={{
           headerShown: !isForced,
-          title: "用户协议与隐私政策",
+          headerTitle: "用户协议与隐私政策",
           headerBackTitle: "返回",
           gestureEnabled: !isForced,
-          headerShadowVisible: false,
         }}
       />
       <View style={styles.content}>
@@ -37,7 +36,7 @@ export default function PrivacyPolicyScreen() {
 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <Text style={[styles.text, { color: theme.text }]}>
-            欢迎您使用 BlackBox！
+            欢迎您使用黑匣子！
             {"\n\n"}
             我们非常重视您的隐私保护和个人信息安全。在您使用本服务前，请仔细阅读并了解本《隐私政策》。
             {"\n\n"}
@@ -57,7 +56,7 @@ export default function PrivacyPolicyScreen() {
             {"\n"}
             我们会根据业务发展和法律法规的要求更新本协议。当本政策发生重大变更时，我们会在版本更新时向您提示。
             {"\n\n"}
-            请您确认已阅读并同意上述条款，开始使用 BlackBox。
+            请您确认已阅读并同意上述条款，开始使用黑匣子。
           </Text>
         </ScrollView>
 

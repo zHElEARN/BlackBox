@@ -68,9 +68,8 @@ export default function GroundScreen() {
       </Section>
 
       <Section title="关于">
-        <SettingItem icon="information-outline" label="关于 BlackBox" />
+        <SettingItem icon="information-outline" label="关于黑匣子" onPress={() => router.push("/about")} />
         <SettingItem icon="file-document-outline" label="用户协议与隐私政策" onPress={() => router.push("/privacy-policy")} />
-        <SettingItem icon="cloud-download-outline" label="检查更新" value="v1.0.0" isLast={true} />
       </Section>
 
       <View style={styles.footer}>
