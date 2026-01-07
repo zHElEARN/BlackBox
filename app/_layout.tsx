@@ -1,7 +1,8 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppState } from "react-native";
 import "react-native-reanimated";
 
@@ -13,6 +14,9 @@ import { useFlightStore } from "@/store/flightStore";
 import { Database } from "@/utils/database";
 import { Storage } from "@/utils/storage";
 
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
@@ -20,6 +24,7 @@ export const unstable_settings = {
 export default function RootLayout() {
   const router = useRouter();
   const appState = useRef(AppState.currentState);
+  const [isReady, setIsReady] = useState(false);
 
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
@@ -58,6 +63,9 @@ export default function RootLayout() {
         }
       } catch (e) {
         console.error("Initialization failed", e);
+      } finally {
+        setIsReady(true);
+        await SplashScreen.hideAsync();
       }
     }
 
@@ -82,6 +90,10 @@ export default function RootLayout() {
       subscription.remove();
     };
   }, []);
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <ThemeProvider value={navigationTheme}>
