@@ -48,6 +48,21 @@ export default function FlightDetailScreen() {
     );
   }
 
+  const formatFullAddress = (locationJson: string | null) => {
+    if (!locationJson) return "未记录";
+    try {
+      const address = JSON.parse(locationJson);
+      if (typeof address === "object") {
+        const { country, province, city, district, street } = address;
+        // Construct full address: Country Province City District Street
+        return [country, province, city, district, street].filter(Boolean).join("");
+      }
+      return locationJson;
+    } catch (e) {
+      return locationJson;
+    }
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
       <Stack.Screen
@@ -71,7 +86,8 @@ export default function FlightDetailScreen() {
           </View>
           <View style={styles.infoContent}>
             <Text style={[styles.infoLabel, { color: theme.icon }]}>起飞位置</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{track.takeoffLat !== null ? `${track.takeoffLat.toFixed(6)}, ${track.takeoffLong?.toFixed(6)}` : "未记录"}</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{formatFullAddress(track.takeoffLocation)}</Text>
+            {track.takeoffLat !== null && <Text style={[styles.infoCoords, { color: theme.icon }]}>{`${track.takeoffLat.toFixed(6)}, ${track.takeoffLong?.toFixed(6)}`}</Text>}
           </View>
         </View>
 
@@ -81,7 +97,8 @@ export default function FlightDetailScreen() {
           </View>
           <View style={styles.infoContent}>
             <Text style={[styles.infoLabel, { color: theme.icon }]}>降落位置</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{track.landingLat !== null ? `${track.landingLat.toFixed(6)}, ${track.landingLong?.toFixed(6)}` : "未记录"}</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{formatFullAddress(track.landingLocation)}</Text>
+            {track.landingLat !== null && <Text style={[styles.infoCoords, { color: theme.icon }]}>{`${track.landingLat.toFixed(6)}, ${track.landingLong?.toFixed(6)}`}</Text>}
           </View>
         </View>
       </View>
@@ -144,6 +161,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
+  },
+  infoCoords: {
+    fontSize: 12,
+    marginTop: 4,
+    fontVariant: ["tabular-nums"],
+    opacity: 0.7,
   },
   noteContainer: {
     padding: 16,

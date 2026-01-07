@@ -11,6 +11,7 @@ interface FlightStateData {
   takeoffTime: number | null;
   takeoffLat: number | null;
   takeoffLong: number | null;
+  takeoffLocation: string | null;
 }
 
 interface FlightState extends FlightStateData {
@@ -26,6 +27,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
   takeoffTime: null,
   takeoffLat: null,
   takeoffLong: null,
+  takeoffLocation: null,
   isLoading: true,
   loadingMessage: null,
 
@@ -52,6 +54,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
         takeoffTime: now,
         takeoffLat: location?.latitude ?? null,
         takeoffLong: location?.longitude ?? null,
+        takeoffLocation: location?.address ?? null,
       };
 
       // 2. 保存到 KV 并更新状态
@@ -65,7 +68,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
   },
 
   endFlight: async (landingType: "NORMAL" | "FORCED" = "NORMAL") => {
-    const { isFlying, takeoffTime, takeoffLat, takeoffLong } = get();
+    const { isFlying, takeoffTime, takeoffLat, takeoffLong, takeoffLocation } = get();
 
     if (!isFlying || !takeoffTime) return;
 
@@ -90,8 +93,10 @@ export const useFlightStore = create<FlightState>((set, get) => ({
         landingTime: new Date().toISOString(),
         takeoffLat: takeoffLat,
         takeoffLong: takeoffLong,
+        takeoffLocation: takeoffLocation,
         landingLat: location?.latitude ?? null,
         landingLong: location?.longitude ?? null,
+        landingLocation: location?.address ?? null,
         landingType: landingType,
       });
 
@@ -104,6 +109,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
         takeoffTime: null,
         takeoffLat: null,
         takeoffLong: null,
+        takeoffLocation: null,
         isLoading: false,
         loadingMessage: null,
       });
@@ -123,6 +129,7 @@ export const useFlightStore = create<FlightState>((set, get) => ({
           takeoffTime: saved.takeoffTime,
           takeoffLat: saved.takeoffLat ?? null,
           takeoffLong: saved.takeoffLong ?? null,
+          takeoffLocation: saved.takeoffLocation ?? null,
           isLoading: false,
         });
       } else {

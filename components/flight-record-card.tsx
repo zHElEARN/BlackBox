@@ -56,6 +56,21 @@ export function FlightRecordCard({ track, style, onPress, onLongPress }: FlightR
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
+  const formatLocation = (locationJson: string | null) => {
+    if (!locationJson) return null;
+    try {
+      const address = JSON.parse(locationJson);
+      // Return "City District", e.g. "北京市朝阳区"
+      // If city is empty, try province (though usually city is present)
+      const city = address.city || address.province || "";
+      const district = address.district || "";
+      return `${city}${district}`;
+    } catch (e) {
+      // In case it's not JSON (legacy data), return as is or null
+      return locationJson;
+    }
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -94,7 +109,7 @@ export function FlightRecordCard({ track, style, onPress, onLongPress }: FlightR
           <Text style={[styles.time, { color: theme.text }]}>{formatTime(takeoffDate)}</Text>
           {track.takeoffLocation && (
             <Text style={[styles.location, { color: theme.icon }]} numberOfLines={1}>
-              {track.takeoffLocation}
+              {formatLocation(track.takeoffLocation)}
             </Text>
           )}
         </View>
@@ -115,7 +130,7 @@ export function FlightRecordCard({ track, style, onPress, onLongPress }: FlightR
           <Text style={[styles.time, { color: theme.text }]}>{formatTime(landingDate)}</Text>
           {track.landingLocation && (
             <Text style={[styles.location, { color: theme.icon }]} numberOfLines={1}>
-              {track.landingLocation}
+              {formatLocation(track.landingLocation)}
             </Text>
           )}
         </View>
