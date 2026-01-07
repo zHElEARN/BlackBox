@@ -5,10 +5,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { ThemeMode, useUIStore } from "@/store/uiStore";
 
 export default function GroundScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme() ?? "light";
+  const { themeMode } = useUIStore();
   const theme = Colors[colorScheme];
   const insets = useSafeAreaInsets();
 
@@ -43,6 +45,17 @@ export default function GroundScreen() {
     </View>
   );
 
+  const getThemeLabel = (mode: ThemeMode) => {
+    switch (mode) {
+      case "system":
+        return "系统默认";
+      case "dark":
+        return "深色模式";
+      case "light":
+        return "浅色模式";
+    }
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
       <Section title="安全性">
@@ -51,7 +64,7 @@ export default function GroundScreen() {
       <Text style={[styles.sectionDescription, { color: theme.icon }]}>开启后，每次进入应用都需要进行身份验证，确保您的飞行数据安全。</Text>
 
       <Section title="外观">
-        <SettingItem icon="palette-outline" label="应用主题" value={colorScheme === "dark" ? "深色模式" : "浅色模式"} isLast={true} />
+        <SettingItem icon="palette-outline" label="应用主题" value={getThemeLabel(themeMode)} onPress={() => router.push("/theme-settings")} isLast={true} />
       </Section>
 
       <Section title="关于">
