@@ -59,6 +59,13 @@ export const Database = {
    * 更新航迹记录
    */
   async updateTrack(id: number, data: Partial<NewFlightTrack>) {
-    return await db.update(flightTracks).set(data).where(eq(flightTracks.id, id));
+    // 过滤掉 undefined 的值
+    const updateData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined));
+
+    if (Object.keys(updateData).length === 0) {
+      return;
+    }
+
+    return await db.update(flightTracks).set(updateData).where(eq(flightTracks.id, id));
   },
 };
