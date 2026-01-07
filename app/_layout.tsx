@@ -1,11 +1,14 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { AppState } from "react-native";
 import "react-native-reanimated";
 
+import BiometricLockScreen from "@/components/biometric-lock-screen";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useAuthStore } from "@/store/authStore";
 import { useFlightStore } from "@/store/flightStore";
 import { Database } from "@/utils/database";
 import { Storage } from "@/utils/storage";
@@ -16,6 +19,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const router = useRouter();
+  const appState = useRef(AppState.currentState);
 
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
@@ -40,6 +44,12 @@ export default function RootLayout() {
         await Database.init();
         await useFlightStore.getState().restoreState();
 
+        // Check lock state on launch
+        const authState = useAuthStore.getState();
+        if (authState.isBiometricEnabled) {
+          authState.setLocked(true);
+        }
+
         const hasAgreed = await Storage.get<boolean>("has_agreed_privacy");
         if (!hasAgreed) {
           setTimeout(() => {
@@ -52,6 +62,25 @@ export default function RootLayout() {
     }
 
     prepare();
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+        // Came to foreground
+        const authState = useAuthStore.getState();
+        const now = Date.now();
+        // Add 2s grace period to prevent immediate re-lock after FaceID unlock
+        if (authState.isBiometricEnabled && !authState.isAuthenticating && now - authState.lastSuccessTime > 2000) {
+          authState.setLocked(true);
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   return (
@@ -67,6 +96,7 @@ export default function RootLayout() {
         <Stack.Screen name="privacy-policy" />
         <Stack.Screen name="flight-log/finish" options={{ presentation: "modal", headerShown: false }} />
       </Stack>
+      <BiometricLockScreen />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

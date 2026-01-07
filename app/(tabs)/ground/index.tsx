@@ -1,20 +1,62 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useAuthStore } from "@/store/authStore";
 import { ThemeMode, useUIStore } from "@/store/uiStore";
 
 export default function GroundScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme() ?? "light";
   const { themeMode } = useUIStore();
+  const { isBiometricEnabled, setBiometricEnabled, setIsAuthenticating } = useAuthStore();
   const theme = Colors[colorScheme];
   const insets = useSafeAreaInsets();
+  // Using generic terms for all biometric/passcode types
+  const biometricLabel = "安全验证";
+  const biometricIcon = "shield-check";
 
-  const SettingItem = ({ icon, label, value, onPress, type = "chevron", isLast = false }: { icon: string; label: string; value?: string; onPress?: () => void; type?: "chevron" | "switch"; isLast?: boolean }) => (
+  const handleBiometricToggle = async (value: boolean) => {
+    if (value) {
+      // Trying to enable
+      try {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        if (!hasHardware) {
+          Alert.alert("不支持", "您的设备不支持安全验证功能。");
+          return;
+        }
+
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (!isEnrolled) {
+          Alert.alert("未设置", "请先在系统设置中设置安全验证方式。");
+          return;
+        }
+
+        setIsAuthenticating(true);
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: "验证身份以开启",
+        });
+
+        if (result.success) {
+          setBiometricEnabled(true);
+        }
+      } catch (error) {
+        Alert.alert("错误", "无法启用安全验证。");
+      } finally {
+        // Delay slightly to ensure AppState logic has processed if it raced
+        setTimeout(() => setIsAuthenticating(false), 1000);
+      }
+    } else {
+      // Disable simply
+      setBiometricEnabled(false);
+    }
+  };
+
+  const SettingItem = ({ icon, label, value, onPress, type = "chevron", isLast = false, switchValue, onSwitchChange }: { icon: string; label: string; value?: string; onPress?: () => void; type?: "chevron" | "switch"; isLast?: boolean; switchValue?: boolean; onSwitchChange?: (val: boolean) => void }) => (
     <TouchableOpacity style={[styles.settingItem, !isLast && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colorScheme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]} onPress={onPress} disabled={type === "switch"} activeOpacity={0.7}>
       <View style={styles.settingLeft}>
         <View style={[styles.iconContainer, { backgroundColor: theme.tint + "15" }]}>
@@ -25,14 +67,7 @@ export default function GroundScreen() {
       <View style={styles.settingRight}>
         {value && <Text style={[styles.settingValue, { color: theme.icon }]}>{value}</Text>}
         {type === "chevron" && <MaterialCommunityIcons name="chevron-right" size={20} color={theme.icon} />}
-        {type === "switch" && (
-          <Switch
-            trackColor={{ false: theme.icon + "40", true: theme.tint + "60" }}
-            thumbColor={theme.tint}
-            ios_backgroundColor={theme.icon + "40"}
-            value={false} // Placeholder
-          />
-        )}
+        {type === "switch" && <Switch trackColor={{ false: theme.icon + "40", true: theme.tint + "60" }} thumbColor={theme.tint} ios_backgroundColor={theme.icon + "40"} value={switchValue} onValueChange={onSwitchChange} />}
       </View>
     </TouchableOpacity>
   );
@@ -59,7 +94,7 @@ export default function GroundScreen() {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
       <Section title="安全性">
-        <SettingItem icon="fingerprint" label="生物识别验证" type="switch" isLast={true} />
+        <SettingItem icon={biometricIcon} label={biometricLabel} type="switch" isLast={true} switchValue={isBiometricEnabled} onSwitchChange={handleBiometricToggle} />
       </Section>
       <Text style={[styles.sectionDescription, { color: theme.icon }]}>开启后，每次进入应用都需要进行身份验证，确保您的飞行数据安全。</Text>
 
