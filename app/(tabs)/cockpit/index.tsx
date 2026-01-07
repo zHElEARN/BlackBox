@@ -47,7 +47,7 @@ export default function CockpitScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: "center", alignItems: "center" }]}>
         <ActivityIndicator size="large" color={theme.tint} />
         {loadingMessage && <Text style={[styles.loadingText, { color: theme.text }]}>{loadingMessage}</Text>}
       </View>

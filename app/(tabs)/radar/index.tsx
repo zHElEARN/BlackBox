@@ -1,15 +1,58 @@
-import { StyleSheet, Text, View } from "react-native";
-
+import { DepartureWindows } from "@/components/radar/departure-windows";
+import { FlightHUD } from "@/components/radar/flight-hud";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Database } from "@/utils/database";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+
+interface RadarStats {
+  totalFlightHours: number;
+  totalMissions: number;
+  monthlySorties: number;
+  avgDurationMinutes: number;
+  hourlyDistribution: number[];
+  weeklyDistribution: number[];
+}
 
 export default function RadarScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
+  const [stats, setStats] = useState<RadarStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
+
+  const loadData = async () => {
+    try {
+      const data = await Database.getRadarStats();
+      setStats(data);
+    } catch (error) {
+      console.error("Failed to load radar stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !stats) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.background, justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color={theme.tint} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.text, { color: theme.text }]}>雷达内容占位</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <FlightHUD stats={stats} theme={theme} />
+        <DepartureWindows stats={stats} theme={theme} />
+      </ScrollView>
     </View>
   );
 }
@@ -17,11 +60,9 @@ export default function RadarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
   },
 });

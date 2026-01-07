@@ -1,6 +1,6 @@
 import { flightTracks, NewFlightTrack } from "@/db/schema";
 import migrations from "@/drizzle/migrations";
-import { and, desc, eq, gte, lt } from "drizzle-orm";
+import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import * as SQLite from "expo-sqlite";
@@ -100,6 +100,78 @@ export const Database = {
     return {
       today: todayCount,
       month: monthCount,
+    };
+  },
+
+  /**
+   * 获取雷达页面所需的汇总数据
+   */
+  async getRadarStats() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const startOfNextMonth = nextMonth.toISOString();
+
+    // 1. 获取总统计数据：总次数和总时长
+    // 使用 strftime 计算秒数差值
+    const totalStatsRes = await db
+      .select({
+        count: sql<number>`count(*)`,
+        duration: sql<number>`sum(strftime('%s', ${flightTracks.landingTime}) - strftime('%s', ${flightTracks.takeoffTime}))`,
+      })
+      .from(flightTracks);
+
+    const totalMissions = totalStatsRes[0]?.count ?? 0;
+    const totalDurationSeconds = totalStatsRes[0]?.duration ?? 0;
+
+    // 2. 获取本月飞行频次
+    const monthlyStatsRes = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(flightTracks)
+      .where(and(gte(flightTracks.takeoffTime, startOfMonth), lt(flightTracks.takeoffTime, startOfNextMonth)));
+
+    const monthlySorties = monthlyStatsRes[0]?.count ?? 0;
+
+    const totalFlightHours = totalDurationSeconds / 3600;
+    const avgDurationSeconds = totalMissions > 0 ? totalDurationSeconds / totalMissions : 0;
+
+    // 3. 按小时分布 (0-23)
+    const hourlyRes = await db
+      .select({
+        hour: sql<string>`strftime('%H', ${flightTracks.takeoffTime})`,
+        count: sql<number>`count(*)`,
+      })
+      .from(flightTracks)
+      .groupBy(sql`strftime('%H', ${flightTracks.takeoffTime})`);
+
+    const hourlyDistribution = new Array(24).fill(0);
+    hourlyRes.forEach((item) => {
+      const h = parseInt(item.hour, 10);
+      if (!isNaN(h)) hourlyDistribution[h] = item.count;
+    });
+
+    // 4. 按周分布 (0-6, 0=Sunday)
+    const weeklyRes = await db
+      .select({
+        day: sql<string>`strftime('%w', ${flightTracks.takeoffTime})`,
+        count: sql<number>`count(*)`,
+      })
+      .from(flightTracks)
+      .groupBy(sql`strftime('%w', ${flightTracks.takeoffTime})`);
+
+    const weeklyDistribution = new Array(7).fill(0);
+    weeklyRes.forEach((item) => {
+      const d = parseInt(item.day, 10);
+      if (!isNaN(d)) weeklyDistribution[d] = item.count;
+    });
+
+    return {
+      totalFlightHours: totalFlightHours,
+      totalMissions: totalMissions,
+      monthlySorties: monthlySorties,
+      avgDurationMinutes: avgDurationSeconds / 60,
+      hourlyDistribution,
+      weeklyDistribution,
     };
   },
 };
