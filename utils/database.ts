@@ -138,11 +138,11 @@ export const Database = {
     // 3. 按小时分布 (0-23)
     const hourlyRes = await db
       .select({
-        hour: sql<string>`strftime('%H', ${flightTracks.takeoffTime})`,
+        hour: sql<string>`strftime('%H', ${flightTracks.takeoffTime}, 'localtime')`,
         count: sql<number>`count(*)`,
       })
       .from(flightTracks)
-      .groupBy(sql`strftime('%H', ${flightTracks.takeoffTime})`);
+      .groupBy(sql`strftime('%H', ${flightTracks.takeoffTime}, 'localtime')`);
 
     const hourlyDistribution = new Array(24).fill(0);
     hourlyRes.forEach((item) => {
@@ -153,11 +153,11 @@ export const Database = {
     // 4. 按周分布 (0-6, 0=Sunday)
     const weeklyRes = await db
       .select({
-        day: sql<string>`strftime('%w', ${flightTracks.takeoffTime})`,
+        day: sql<string>`strftime('%w', ${flightTracks.takeoffTime}, 'localtime')`,
         count: sql<number>`count(*)`,
       })
       .from(flightTracks)
-      .groupBy(sql`strftime('%w', ${flightTracks.takeoffTime})`);
+      .groupBy(sql`strftime('%w', ${flightTracks.takeoffTime}, 'localtime')`);
 
     const weeklyDistribution = new Array(7).fill(0);
     weeklyRes.forEach((item) => {
