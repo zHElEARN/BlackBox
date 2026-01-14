@@ -66,7 +66,18 @@ export const LastFlightCard = ({ lastFlight, onPress }: LastFlightCardProps) => 
   };
 
   return (
-    <TouchableOpacity style={[styles.card, { backgroundColor: cardBackground }]} activeOpacity={0.8} onPress={onPress}>
+    <TouchableOpacity
+      style={[
+        styles.card,
+        {
+          backgroundColor: cardBackground,
+          borderWidth: 1,
+          borderColor: colorScheme === "light" ? "rgba(0,0,0,0.05)" : theme.border,
+        },
+      ]}
+      activeOpacity={0.8}
+      onPress={onPress}
+    >
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <MaterialCommunityIcons name="history" size={18} color={theme.tint} style={{ marginRight: 6 }} />
