@@ -43,11 +43,8 @@
         {
           "backgroundColor": "#0B0B0B",
           "image": "./assets/images/icon_transparent.png",
-          "imageWidth": 100,
-          "resizeMode": "contain",
-          "dark": {
-            "backgroundColor": "#0B0B0B"
-          }
+          "imageWidth": 120,
+          "resizeMode": "contain"
         }
       ]
     ],

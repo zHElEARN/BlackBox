@@ -3,50 +3,49 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const BrandBlue = "#5E97D1";
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    card: '#f2f2f2',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-    border: '#E1E4E8',
+    text: "#11181C",
+    background: "#FFFFFF",
+    card: "#F5F5F7",
+    tint: BrandBlue,
+    icon: "#8E8E93",
+    tabIconDefault: "#8E8E93",
+    tabIconSelected: BrandBlue,
+    border: "#E5E5E7",
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    card: '#202020',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-    border: '#30363D',
+    text: "#F2F2F7",
+    background: "#0B0B0B",
+    card: "#1C1C1E",
+    tint: BrandBlue,
+    icon: "#8E8E93",
+    tabIconDefault: "#8E8E93",
+    tabIconSelected: BrandBlue,
+    border: "#2C2C2E",
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
+    sans: "system-ui",
     /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
+    serif: "ui-serif",
     /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
+    rounded: "ui-rounded",
     /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+    mono: "ui-monospace",
   },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+    sans: "normal",
+    serif: "serif",
+    rounded: "normal",
+    mono: "monospace",
   },
   web: {
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
