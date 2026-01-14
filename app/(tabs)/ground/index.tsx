@@ -13,7 +13,7 @@ export default function GroundScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme() ?? "light";
   const { themeMode } = useUIStore();
-  const { isBiometricEnabled, setBiometricEnabled, setIsAuthenticating } = useAuthStore();
+  const { isBiometricEnabled, setBiometricEnabled, setIsAuthenticating, setLastSuccessTime } = useAuthStore();
   const theme = Colors[colorScheme];
   const insets = useSafeAreaInsets();
   // Using generic terms for all biometric/passcode types
@@ -43,6 +43,7 @@ export default function GroundScreen() {
 
         if (result.success) {
           setBiometricEnabled(true);
+          setLastSuccessTime(Date.now());
         }
       } catch (error) {
         Alert.alert("错误", "无法启用安全验证。");
