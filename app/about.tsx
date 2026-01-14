@@ -107,8 +107,8 @@ export default function AboutScreen() {
       />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={[styles.appName, { color: theme.text }]}>黑匣子</Text>
-          <Text style={[styles.version, { color: theme.icon }]}>Version 1.0.0 (Build 20260107)</Text>
+          <Text style={[styles.appName, { color: theme.text }]}>黑匣子 App</Text>
+          <Text style={[styles.version, { color: theme.icon }]}>BlackBox App</Text>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.card }]}>
@@ -117,20 +117,22 @@ export default function AboutScreen() {
             {"\n\n"}
             我们致力于为您提供最便捷、精准的飞行数据记录服务，帮助您珍藏每一次飞行的独特体验。
             {"\n\n"}
-            利用先进的定位技术和直观的数据可视化，黑匣子将成为您探索天空的最佳伴侣。
+            利用定位技术和直观的数据可视化，黑匣子将成为您探索天空的最佳伴侣。
           </Text>
         </View>
 
-        <View style={styles.devSection}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>数据管理</Text>
-          <TouchableOpacity style={[styles.button, { backgroundColor: colorScheme === "dark" ? "#FFFFFF" : theme.tint }]} onPress={handleFillMockData}>
-            <Text style={[styles.buttonText, { color: colorScheme === "dark" ? "#000000" : "#FFFFFF" }]}>生成 60 条模拟数据</Text>
-          </TouchableOpacity>
+        {__DEV__ && (
+          <View style={styles.devSection}>
+            <Text style={[styles.sectionTitle, { color: theme.icon }]}>数据管理</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: colorScheme === "dark" ? "#FFFFFF" : theme.tint }]} onPress={handleFillMockData}>
+              <Text style={[styles.buttonText, { color: colorScheme === "dark" ? "#000000" : "#FFFFFF" }]}>生成 60 条模拟数据</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, { backgroundColor: "#ff4444" }]} onPress={handleClearDatabase}>
-            <Text style={styles.buttonText}>清空数据库 (慎用)</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity style={[styles.button, { backgroundColor: "#ff4444" }]} onPress={handleClearDatabase}>
+              <Text style={styles.buttonText}>清空数据库 (慎用)</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.footer}>
           <Text style={[styles.copyright, { color: theme.icon }]}>Design & Developed by</Text>

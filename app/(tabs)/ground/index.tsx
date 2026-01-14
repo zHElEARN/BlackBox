@@ -106,11 +106,6 @@ export default function GroundScreen() {
         <SettingItem icon="information-outline" label="关于黑匣子" onPress={() => router.push("/about")} />
         <SettingItem icon="file-document-outline" label="用户协议与隐私政策" onPress={() => router.push("/privacy-policy")} />
       </Section>
-
-      <View style={styles.footer}>
-        <Text style={[styles.footerText, { color: theme.icon }]}>BlackBox Flight Terminal</Text>
-        <Text style={[styles.footerVersion, { color: theme.icon }]}>Version 1.0.0 (Build 20260107)</Text>
-      </View>
     </ScrollView>
   );
 }
@@ -186,19 +181,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     opacity: 0.7,
     lineHeight: 16,
-  },
-  footer: {
-    marginTop: 40,
-    alignItems: "center",
-    gap: 4,
-  },
-  footerText: {
-    fontSize: 13,
-    fontWeight: "600",
-    opacity: 0.5,
-  },
-  footerVersion: {
-    fontSize: 11,
-    opacity: 0.3,
   },
 });

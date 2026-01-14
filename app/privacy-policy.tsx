@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -12,6 +12,7 @@ export default function PrivacyPolicyScreen() {
   const { showAgree } = useLocalSearchParams<{ showAgree: string }>();
   // showAgree is passed as a string "true" when forced validation is needed
   const isForced = showAgree === "true";
+  const insets = useSafeAreaInsets();
 
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -22,7 +23,7 @@ export default function PrivacyPolicyScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={isForced ? ["top", "bottom", "left", "right"] : ["bottom", "left", "right"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={isForced ? ["top", "bottom", "left", "right"] : ["left", "right"]}>
       <Stack.Screen
         options={{
           headerShown: !isForced,
@@ -34,7 +35,7 @@ export default function PrivacyPolicyScreen() {
       <View style={styles.content}>
         {isForced && <Text style={[styles.title, { color: theme.text }]}>服务协议与隐私政策</Text>}
 
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingBottom: isForced ? 20 : insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
           <Text style={[styles.text, { color: theme.text }]}>
             欢迎您使用黑匣子！
             {"\n\n"}
@@ -80,7 +81,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 10,
   },
   title: {
     fontSize: 24,
