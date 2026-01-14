@@ -13,8 +13,12 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "我们需要您的位置权限来记录飞行的起飞和降落地点。",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "我们需要您的位置权限来记录飞行的起飞和降落地点。",
         "NSFaceIDUsageDescription": "我们需要您的面容ID权限来解锁应用。",
         "UIDesignRequiresCompatibility": true
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.zhelearn.BlackBox.iOS",
       "appleTeamId": "7GPA4WLM3W",
