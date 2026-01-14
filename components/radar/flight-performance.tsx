@@ -41,10 +41,6 @@ export function FlightPerformance({ stats, theme }: FlightPerformanceProps) {
         <View style={styles.chartContainer}>
           {recentExperience.length > 0 ? (
             recentExperience.map((score, index) => {
-              let barColor = "#EF4444";
-              if (score >= 8) barColor = "#10B981";
-              else if (score >= 5) barColor = "#F59E0B";
-
               const heightPercent = (score / 10) * 100;
 
               return (
@@ -54,7 +50,7 @@ export function FlightPerformance({ stats, theme }: FlightPerformanceProps) {
                       style={[
                         styles.barFill,
                         {
-                          backgroundColor: barColor,
+                          backgroundColor: theme.tint,
                           height: `${heightPercent}%`,
                         },
                       ]}
@@ -81,8 +77,8 @@ export function FlightPerformance({ stats, theme }: FlightPerformanceProps) {
             <View style={styles.landingBarContainer}>
               {totalLandings > 0 ? (
                 <>
-                  <View style={[styles.landingBarSegment, { flex: landingStats.normal, backgroundColor: "#10B981" }]} />
-                  <View style={[styles.landingBarSegment, { flex: landingStats.forced, backgroundColor: "#EF4444" }]} />
+                  <View style={[styles.landingBarSegment, { flex: landingStats.normal, backgroundColor: theme.tint }]} />
+                  <View style={[styles.landingBarSegment, { flex: landingStats.forced, backgroundColor: theme.icon }]} />
                 </>
               ) : (
                 <View style={[styles.landingBarSegment, { flex: 1, backgroundColor: theme.border }]} />
@@ -90,11 +86,11 @@ export function FlightPerformance({ stats, theme }: FlightPerformanceProps) {
             </View>
             <View style={styles.landingLegend}>
               <View style={styles.legendItem}>
-                <View style={[styles.dot, { backgroundColor: "#10B981" }]} />
+                <View style={[styles.dot, { backgroundColor: theme.tint }]} />
                 <Text style={[styles.legendText, { color: theme.icon }]}>顺利 {totalLandings > 0 ? normalPercent.toFixed(0) : 0}%</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.dot, { backgroundColor: "#EF4444" }]} />
+                <View style={[styles.dot, { backgroundColor: theme.icon }]} />
                 <Text style={[styles.legendText, { color: theme.icon }]}>迫降 {totalLandings > 0 ? forcedPercent.toFixed(0) : 0}%</Text>
               </View>
             </View>

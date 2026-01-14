@@ -26,7 +26,7 @@ export function DepartureWindows({ stats, theme }: DepartureWindowsProps) {
         <>
           {/* 24h Hourly Distribution */}
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.cardTitle, { color: theme.text }]}>全天出动热力图 (24H)</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>全天出动热力图</Text>
             <View style={styles.chartContainer}>
               {stats.hourlyDistribution.map((count, index) => (
                 <View key={index} style={styles.hourlyBarWrapper}>
@@ -47,7 +47,7 @@ export function DepartureWindows({ stats, theme }: DepartureWindowsProps) {
 
           {/* Weekly Distribution */}
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.cardTitle, { color: theme.text }]}>周活跃趋势 (Weekly)</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>周活跃趋势</Text>
             <View style={styles.weeklyChartContainer}>
               {["周日", "周一", "周二", "周三", "周四", "周五", "周六"].map((day, index) => {
                 const count = stats.weeklyDistribution[index];
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-around",
-    height: 120,
+    height: 160,
   },
   weeklyBarWrapper: {
     alignItems: "center",

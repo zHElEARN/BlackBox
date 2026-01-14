@@ -38,7 +38,7 @@ export function SpatialDistribution({ stats, theme }: SpatialDistributionProps) 
 
           {/* Top Locations List */}
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.cardTitle, { color: theme.text }]}>常驻机库 (Top Locations)</Text>
+            <Text style={[styles.cardTitle, { color: theme.text }]}>常驻机库</Text>
 
             {stats.topLocations.length > 0 ? (
               <View style={styles.listContainer}>
