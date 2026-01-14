@@ -112,7 +112,7 @@ export default function RootLayout() {
         <Stack.Screen name="flight-add/index" options={{ title: "手动记录飞行", headerBackTitle: "取消" }} />
       </Stack>
       <BiometricLockScreen />
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </ThemeProvider>
   );
 }
