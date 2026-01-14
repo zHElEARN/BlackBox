@@ -4,7 +4,7 @@
     "slug": "BlackBox",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ios_light.png",
     "scheme": "blackbox",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#0B0B0B",
@@ -13,16 +13,22 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "我们需要您的位置权限来记录飞行的起飞和降落地点。",
-        "NSFaceIDUsageDescription": "我们需要您的面容ID权限来解锁应用。"
+        "NSFaceIDUsageDescription": "我们需要您的面容ID权限来解锁应用。",
+        "UIDesignRequiresCompatibility": true
       },
       "bundleIdentifier": "com.zhelearn.BlackBox.iOS",
-      "appleTeamId": "7GPA4WLM3W"
+      "appleTeamId": "7GPA4WLM3W",
+      "icon": {
+        "dark": "./assets/images/ios_transparent.png",
+        "light": "./assets/images/ios_light.png",
+        "tinted": "./assets/images/ios_transparent.png"
+      }
     },
     "android": {
       "backgroundColor": "#0B0B0B",
       "adaptiveIcon": {
         "backgroundColor": "#0B0B0B",
-        "foregroundImage": "./assets/images/android-icon-foreground.png"
+        "foregroundImage": "./assets/images/android_transparent.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -36,7 +42,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#0B0B0B",
-          "image": "./assets/images/icon.png",
+          "image": "./assets/images/icon_transparent.png",
           "imageWidth": 100,
           "resizeMode": "contain",
           "dark": {
