@@ -8,6 +8,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuthStore } from "@/store/authStore";
 import { ThemeMode, useUIStore } from "@/store/uiStore";
+import { FlightDataTransfer } from "@/utils/data-transfer";
 
 export default function GroundScreen() {
   const router = useRouter();
@@ -101,6 +102,11 @@ export default function GroundScreen() {
 
       <Section title="外观">
         <SettingItem icon="palette-outline" label="应用主题" value={getThemeLabel(themeMode)} onPress={() => router.push("/theme-settings")} isLast={true} />
+      </Section>
+
+      <Section title="数据管理">
+        <SettingItem icon="database-export" label="导出所有数据" onPress={() => FlightDataTransfer.exportData()} />
+        <SettingItem icon="database-import" label="导入数据" onPress={() => FlightDataTransfer.importData()} isLast={true} />
       </Section>
 
       <Section title="关于">
